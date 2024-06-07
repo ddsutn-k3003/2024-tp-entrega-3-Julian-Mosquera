@@ -2,13 +2,14 @@ package ar.edu.utn.dds.k3003.Clientes;
 
 import ar.edu.utn.dds.k3003.facades.dtos.ViandaDTO;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
+import retrofit2.http.*;
 
 public interface ViandasRetrofitClient {
 
     @GET("viandas/{qr}")
     Call<ViandaDTO> get(@Path("qr") String qr);
 
+    @PATCH("viandas/{qr}")
+    Call<ViandaDTO> patch(@Path("qr") String qr, @Query("heladeraDestino") int heladeraDestino);
 
 }

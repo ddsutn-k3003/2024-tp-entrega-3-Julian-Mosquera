@@ -81,9 +81,6 @@ public class HeladeraProxy  implements FachadaHeladeras {
         if (execute.code() == HttpStatus.NOT_FOUND.getCode()) {
             throw new NoSuchElementException("No se pudo retirar la vianda " + retiroDTO.getQrVianda());
         }
-        if(!exito) {
-            throw new RuntimeException("Error conectandose con el componente heladera");
-        }
     }
 
     @Override
