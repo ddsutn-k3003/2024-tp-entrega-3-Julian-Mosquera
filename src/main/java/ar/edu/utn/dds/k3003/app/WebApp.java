@@ -1,6 +1,7 @@
 package ar.edu.utn.dds.k3003.app;
 
 
+import ar.edu.utn.dds.k3003.Clientes.HeladeraProxy;
 import ar.edu.utn.dds.k3003.Clientes.ViandasProxy;
 import ar.edu.utn.dds.k3003.Controllers.*;
 import ar.edu.utn.dds.k3003.facades.dtos.Constants;
@@ -37,6 +38,7 @@ public class WebApp {
         Fachada fachada = new Fachada(entityManager);
         ObjectMapper objectMapper = createObjectMapper();
         fachada.setViandasProxy(new ViandasProxy(objectMapper));
+        fachada.setHeladerasProxy(new HeladeraProxy(objectMapper));
 
         app.get("/rutas", new ListaRutasController(fachada));
         app.get("/rutas/{rutaID}", new BuscarRutaXIDController(fachada));
