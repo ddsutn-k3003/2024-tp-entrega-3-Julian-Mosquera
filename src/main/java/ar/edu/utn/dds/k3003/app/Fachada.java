@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class Fachada implements FachadaLogistica {
-    private EntityManager entityManager;
+    private EntityManagerFactory entityManagerFactory;
     private final RepositorioRuta repositorioRuta;
     private final RepositorioTraslado repositorioTraslado;
     private final RutaMapper rutaMapper;
@@ -28,85 +28,119 @@ public class Fachada implements FachadaLogistica {
     private FachadaViandas fachadaViandas;
     private FachadaHeladeras fachadaHeladeras;
 
-    public Fachada(EntityManager entityManager){
-        this.entityManager = entityManager;
-        this.repositorioRuta = new RepositorioRuta(entityManager);
+    public Fachada(EntityManagerFactory entityManagerFactory){
+        this.entityManagerFactory = entityManagerFactory;
+        this.repositorioRuta = new RepositorioRuta();
         this.rutaMapper = new RutaMapper();
-        this.repositorioTraslado = new RepositorioTraslado(entityManager);
+        this.repositorioTraslado = new RepositorioTraslado();
         this.trasladoMapper = new TrasladoMapper();
     }
     public Fachada(){
-        this.repositorioRuta = new RepositorioRuta(entityManager);
+        this.repositorioRuta = new RepositorioRuta();
         this.rutaMapper = new RutaMapper();
-        this.repositorioTraslado = new RepositorioTraslado(entityManager);
+        this.repositorioTraslado = new RepositorioTraslado();
         this.trasladoMapper = new TrasladoMapper();
     }
 @Override
 public RutaDTO agregar(RutaDTO rutaDTO){
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    repositorioRuta.setEntityManager(entityManager);
+    repositorioRuta.getEntityManager().getTransaction().begin();
     Ruta ruta = new Ruta(rutaDTO.getColaboradorId(), rutaDTO.getHeladeraIdOrigen(), rutaDTO.getHeladeraIdDestino());
-    entityManager.getTransaction().begin();
     ruta = this.repositorioRuta.guardar(ruta);
-    entityManager.getTransaction().commit();
+    repositorioRuta.getEntityManager().getTransaction().commit();
+    repositorioRuta.getEntityManager().close();
     return rutaMapper.mapear(ruta);
 }
 
 @Override
     public TrasladoDTO buscarXId(Long trasladoID) throws NoSuchElementException{
-        entityManager.getTransaction().begin();
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    repositorioTraslado.setEntityManager(entityManager);
+        repositorioTraslado.getEntityManager().getTransaction().begin();
         TrasladoDTO traslado = trasladoMapper.mapear(repositorioTraslado.buscarXId(trasladoID));
-        entityManager.getTransaction().commit();
+        repositorioTraslado.getEntityManager().getTransaction().commit();
+    repositorioTraslado.getEntityManager().close();
         return  traslado;
 }
 
     public  RutaDTO buscarRutaXId(Long rutaID) throws NoSuchElementException{
-        entityManager.getTransaction().begin();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioTraslado.setEntityManager(entityManager);
+        repositorioRuta.getEntityManager().getTransaction().begin();
         RutaDTO ruta = rutaMapper.mapear(repositorioRuta.buscarXId(rutaID));
-        entityManager.getTransaction().commit();
+        repositorioRuta.getEntityManager().getTransaction().commit();
+        repositorioRuta.getEntityManager().close();
         return ruta;
     }
 
 
 @Override
     public TrasladoDTO asignarTraslado(TrasladoDTO trasladoDTO) throws TrasladoNoAsignableException{
-    entityManager.getTransaction().begin();
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    repositorioTraslado.setEntityManager(entityManager);
+    repositorioRuta.setEntityManager(entityManager);
+    repositorioTraslado.getEntityManager().getTransaction().begin();
     ViandaDTO viandaDTO = fachadaViandas.buscarXQR(trasladoDTO.getQrVianda());
     Random random = new Random();
     List<Ruta> rutasPosibles = repositorioRuta.buscarXHeladera(trasladoDTO.getHeladeraOrigen(), trasladoDTO.getHeladeraDestino());
     if(rutasPosibles.isEmpty()){
+        entityManager.getTransaction().rollback();
+        entityManager.close();
         throw new TrasladoNoAsignableException("No se encontraron rutas posibles para el traslado");
     }
     Ruta ruta = rutasPosibles.get(random.nextInt(rutasPosibles.size()));
     Traslado traslado = new Traslado(viandaDTO.getCodigoQR(), EstadoTrasladoEnum.ASIGNADO, trasladoDTO.getFechaTraslado(), ruta);
     repositorioTraslado.guardar(traslado);
-    entityManager.getTransaction().commit();
+    repositorioTraslado.getEntityManager().getTransaction().commit();
+    repositorioTraslado.getEntityManager().close();
+    repositorioRuta.getEntityManager().close();
     return trasladoMapper.mapear(traslado);
 
     }
 
+
+    public List<TrasladoDTO> findByColaboradorId(Long colaboradorId){
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioTraslado.setEntityManager(entityManager);
+        repositorioTraslado.getEntityManager().getTransaction().begin();
+        List<Traslado> traslados = repositorioTraslado.buscarXColaborador(colaboradorId);
+        repositorioTraslado.getEntityManager().getTransaction().commit();
+        repositorioTraslado.getEntityManager().close();
+        return traslados.stream().map(trasladoMapper::mapear).toList();
+    }
 @Override
     public List<TrasladoDTO> trasladosDeColaborador(Long colaboradorId, Integer mes, Integer anio){
-       entityManager.getTransaction().begin();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioTraslado.setEntityManager(entityManager);
+        repositorioTraslado.getEntityManager().getTransaction().begin();
         List<Traslado> traslados = repositorioTraslado.buscarXColaborador(colaboradorId);
         List<Traslado> trasladosFiltrados = traslados.stream().filter(t -> t.getFechaTraslado().getMonthValue() == mes &&
                                                                         t.getFechaTraslado().getYear() == anio).toList();
-        entityManager.getTransaction().commit();
+        repositorioTraslado.getEntityManager().getTransaction().commit();
+        repositorioTraslado.getEntityManager().close();
         return trasladosFiltrados.stream().map(trasladoMapper :: mapear).toList();
 }
 
 @Override
     public void trasladoRetirado(Long trasladoId){
-        entityManager.getTransaction().begin();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioTraslado.setEntityManager(entityManager);
+        repositorioTraslado.getEntityManager().getTransaction().begin();
         Traslado traslado = repositorioTraslado.buscarXId(trasladoId);
         RetiroDTO retiro = new RetiroDTO(traslado.getQrVianda(), "321", traslado.getRuta().getHeladeraOrigen());
         fachadaHeladeras.retirar(retiro);
         //fachadaViandas.modificarEstado(traslado.getQrVianda(), EstadoViandaEnum.EN_TRASLADO);
         repositorioTraslado.guardar(new Traslado(traslado.getQrVianda(), EstadoTrasladoEnum.EN_VIAJE, traslado.getFechaTraslado(), traslado.getRuta()));
-        entityManager.getTransaction().commit();
+        repositorioTraslado.getEntityManager().getTransaction().commit();
+        repositorioTraslado.getEntityManager().close();
 }
 
 @Override
     public void trasladoDepositado(Long trasladoId){
-    entityManager.getTransaction().begin();
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    repositorioTraslado.setEntityManager(entityManager);
+    repositorioTraslado.getEntityManager().getTransaction().begin();
     TrasladoDTO traslado = trasladoMapper.mapear(repositorioTraslado.buscarXId(trasladoId));
     fachadaHeladeras.depositar(traslado.getHeladeraDestino(), traslado.getQrVianda());
     fachadaViandas.modificarHeladera(traslado.getQrVianda(),traslado.getHeladeraDestino());
@@ -114,21 +148,37 @@ public RutaDTO agregar(RutaDTO rutaDTO){
 
     repositorioTraslado.guardar(new Traslado(traslado.getQrVianda(), EstadoTrasladoEnum.ENTREGADO, traslado.getFechaTraslado(),
             new Ruta(traslado.getColaboradorId(), traslado.getHeladeraOrigen(), traslado.getHeladeraDestino())));
-    entityManager.getTransaction().commit();
+    repositorioTraslado.getEntityManager().getTransaction().commit();
+    repositorioTraslado.getEntityManager().close();
 }
 
     public List<RutaDTO> rutas(){
-        return repositorioRuta.todos().stream().map(rutaMapper::mapear).toList();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioRuta.setEntityManager(entityManager);
+        repositorioRuta.getEntityManager().getTransaction().begin();
+        List<RutaDTO> rutas = repositorioRuta.todos().stream().map(rutaMapper::mapear).toList();
+        repositorioRuta.getEntityManager().getTransaction().commit();
+        repositorioRuta.getEntityManager().close();
+        return rutas;
     }
 
     public List<TrasladoDTO> traslados(){
-        return repositorioTraslado.todos().stream().map(trasladoMapper::mapear).toList();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioTraslado.setEntityManager(entityManager);
+        repositorioTraslado.getEntityManager().getTransaction().begin();
+        List<TrasladoDTO> traslados = repositorioTraslado.todos().stream().map(trasladoMapper::mapear).toList();
+        repositorioTraslado.getEntityManager().getTransaction().commit();
+        repositorioTraslado.getEntityManager().close();
+        return traslados;
     }
 
     public void modificarEstadoTraslado(Long trasladoId, EstadoTrasladoEnum nuevoEstado) throws NoSuchElementException{
-        entityManager.getTransaction().begin();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioTraslado.setEntityManager(entityManager);
+        repositorioTraslado.getEntityManager().getTransaction().begin();
         repositorioTraslado.modificarEstadoXID(trasladoId, nuevoEstado);
-        entityManager.getTransaction().commit();
+        repositorioTraslado.getEntityManager().getTransaction().commit();
+        repositorioTraslado.getEntityManager().close();
     }
 
 

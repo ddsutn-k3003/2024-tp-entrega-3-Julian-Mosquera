@@ -33,8 +33,7 @@ public class WebApp {
     public static void main(String[] args) {
         startEntityManagerFactory();
         var env = System.getenv();
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Fachada fachada = new Fachada(entityManager);
+        Fachada fachada = new Fachada(entityManagerFactory);
         ObjectMapper objectMapper = createObjectMapper();
         fachada.setViandasProxy(new ViandasProxy(objectMapper));
         fachada.setHeladerasProxy(new HeladeraProxy(objectMapper));
@@ -55,9 +54,9 @@ public class WebApp {
         app.patch("/traslados/{trasladoId}", new modificarEstadoController(fachada));
         app.get("/traslados/{trasladoId}", new TrasladoXIdController(fachada));
         app.post("/traslados", new AgregarTrasladosController(fachada));
-        app.get("/borrarDatos", new DBController(entityManager));
         app.post("/depositar/{trasladoId}", new DepositarCotroller(fachada));
         app.post("/retirar/{trasladoId}", new RetirarController(fachada));
+        app.get("/traslados/search/{colaboradorId}", new ListaTrasladosXColaborador(fachada));
     }
 
     public static ObjectMapper createObjectMapper() {

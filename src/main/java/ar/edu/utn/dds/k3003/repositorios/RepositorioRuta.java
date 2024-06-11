@@ -14,12 +14,19 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RepositorioRuta {
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
 
     private EntityManager entityManager;
-
-
-    public RepositorioRuta(EntityManager entityManager){
-        this.entityManager = entityManager;
+    public RepositorioRuta(EntityManagerFactory entityManagerFactory){
+        this.entityManager = entityManagerFactory.createEntityManager();
+    }
+    public RepositorioRuta(){
     }
 
     public Ruta guardar(Ruta ruta){

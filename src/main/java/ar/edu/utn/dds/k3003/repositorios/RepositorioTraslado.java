@@ -5,6 +5,7 @@ import ar.edu.utn.dds.k3003.facades.dtos.TrasladoDTO;
 import ar.edu.utn.dds.k3003.model.Traslado;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -14,10 +15,22 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class RepositorioTraslado {
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
     private EntityManager entityManager;
 
-    public RepositorioTraslado(EntityManager entityManager){
-        this.entityManager = entityManager;
+    public RepositorioTraslado(EntityManagerFactory entityManagerFactory){
+        this.entityManager = entityManagerFactory.createEntityManager();
+    }
+
+    public RepositorioTraslado(){
+
     }
 
     public Traslado guardar(Traslado traslado){
