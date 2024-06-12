@@ -48,7 +48,7 @@ public class HeladeraProxy  implements FachadaHeladeras {
     public void depositar(Integer integer, String s) throws NoSuchElementException {
         JSONObject json = new JSONObject();
         json.put("heladeraId", integer);
-        json.put("codigoQR",s);
+        json.put("qrVianda",s);
         boolean exito = false;
         Response<Void> execute = service.depositar(json).execute();
 

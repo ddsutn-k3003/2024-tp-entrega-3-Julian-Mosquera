@@ -1,5 +1,6 @@
 package ar.edu.utn.dds.k3003.Clientes;
 
+import ar.edu.utn.dds.k3003.facades.dtos.EstadoViandaEnum;
 import ar.edu.utn.dds.k3003.facades.dtos.ViandaDTO;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -11,5 +12,9 @@ public interface ViandasRetrofitClient {
 
     @PATCH("viandas/{qr}")
     Call<ViandaDTO> patch(@Path("qr") String qr, @Query("heladeraDestino") int heladeraDestino);
+
+    @PATCH("viandas/{qr}")
+    Call<ViandaDTO> modificarEstado(@Path("qr") String qr, @Query("estado") EstadoViandaEnum status);
+
 
 }
