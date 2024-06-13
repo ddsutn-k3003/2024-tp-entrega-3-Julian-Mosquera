@@ -83,7 +83,7 @@ public class ViandasProxy implements FachadaViandas {
     @SneakyThrows
     @Override
     public ViandaDTO modificarHeladera(String s, int i) {
-        Response<ViandaDTO> execute = service.patch(s,i).execute();
+        Response<ViandaDTO> execute = service.modificarHeladera(s,i).execute();
 
         if (execute.isSuccessful()) {
             return execute.body();

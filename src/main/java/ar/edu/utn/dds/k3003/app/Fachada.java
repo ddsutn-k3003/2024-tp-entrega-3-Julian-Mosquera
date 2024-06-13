@@ -191,7 +191,6 @@ public void setHeladerasProxy(FachadaHeladeras fachadaHeladeras){this.fachadaHel
 public void setViandasProxy(FachadaViandas fachadaViandas){this.fachadaViandas = fachadaViandas;}
 
 
-
     public RepositorioRuta getRepositorioRuta() {
         return repositorioRuta;
     }

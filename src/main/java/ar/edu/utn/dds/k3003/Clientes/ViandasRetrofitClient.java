@@ -11,7 +11,7 @@ public interface ViandasRetrofitClient {
     Call<ViandaDTO> get(@Path("qr") String qr);
 
     @PATCH("viandas/{qr}")
-    Call<ViandaDTO> patch(@Path("qr") String qr, @Query("heladeraDestino") int heladeraDestino);
+    Call<ViandaDTO> modificarHeladera(@Path("qr") String qr, @Query("heladeraId") int heladeraDestino);
 
     @PATCH("viandas/{qr}")
     Call<ViandaDTO> modificarEstado(@Path("qr") String qr, @Query("estado") EstadoViandaEnum status);
