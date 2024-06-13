@@ -142,6 +142,11 @@ public RutaDTO agregar(RutaDTO rutaDTO){
     repositorioTraslado.setEntityManager(entityManager);
     repositorioTraslado.getEntityManager().getTransaction().begin();
     TrasladoDTO traslado = trasladoMapper.mapear(repositorioTraslado.buscarXId(trasladoId));
+    if(!traslado.getStatus().equals(EstadoTrasladoEnum.EN_VIAJE)){
+        repositorioTraslado.getEntityManager().getTransaction().rollback();
+        repositorioTraslado.getEntityManager().close();
+        throw new NoSuchElementException("La vianda "+traslado.getQrVianda()+" no fue retirada");
+    }
     fachadaHeladeras.depositar(traslado.getHeladeraDestino(), traslado.getQrVianda());
     fachadaViandas.modificarHeladera(traslado.getQrVianda(),traslado.getHeladeraDestino());
     //fachadaViandas.modificarEstado(traslado.getQrVianda(), EstadoViandaEnum.DEPOSITADA);
