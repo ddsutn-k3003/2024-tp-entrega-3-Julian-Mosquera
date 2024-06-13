@@ -16,7 +16,7 @@ public interface HeladerasRetrofitClient {
     Call<Void> retirar(@Body RetiroDTO retiro);
 
     @POST("depositos")
-    Call<Void> depositar(@Body JSONObject body);
+    Call<Void> depositar(@Body ViandaDTO vianda);
 
 
 }

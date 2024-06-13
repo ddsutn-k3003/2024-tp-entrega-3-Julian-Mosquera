@@ -16,6 +16,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class HeladeraProxy  implements FachadaHeladeras {
 
@@ -46,17 +47,16 @@ public class HeladeraProxy  implements FachadaHeladeras {
     @SneakyThrows
     @Override
     public void depositar(Integer integer, String s) throws NoSuchElementException {
-        JSONObject json = new JSONObject();
-        json.put("heladeraId", integer);
-        json.put("qrVianda",s);
+        ViandaDTO viandaDTO = new ViandaDTO(s,null,null,null,integer);
+
         boolean exito = false;
-        Response<Void> execute = service.depositar(json).execute();
+        Response<Void> execute = service.depositar(viandaDTO).execute();
 
         if(execute.isSuccessful()){
              execute.body();
              exito = true;
         }
-        if (execute.code() == HttpStatus.NOT_FOUND.getCode()) {
+        if (execute.code() == HttpStatus.BAD_REQUEST.getCode()) {
             throw new NoSuchElementException("No se pudo depositar la vianda " + s);
         }
     }
@@ -75,7 +75,7 @@ public class HeladeraProxy  implements FachadaHeladeras {
             execute.body();
             exito = true;
         }
-        if (execute.code() == HttpStatus.NOT_FOUND.getCode()) {
+        if (execute.code() == HttpStatus.BAD_REQUEST.getCode()) {
             throw new NoSuchElementException("No se pudo retirar la vianda " + retiroDTO.getQrVianda());
         }
     }
