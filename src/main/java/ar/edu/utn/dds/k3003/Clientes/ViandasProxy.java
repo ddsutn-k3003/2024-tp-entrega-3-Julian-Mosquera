@@ -66,7 +66,7 @@ public class ViandasProxy implements FachadaViandas {
         if (execute.isSuccessful()) {
             return execute.body();
         }
-        if (execute.code() == HttpStatus.NOT_FOUND.getCode()) {
+        if (execute.code() == HttpStatus.INTERNAL_SERVER_ERROR.getCode()) {
             throw new NoSuchElementException("no se encontro la vianda " + qr);
         }
         throw new RuntimeException("Error conectandose con el componente viandas");
