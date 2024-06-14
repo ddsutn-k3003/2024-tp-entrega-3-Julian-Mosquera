@@ -57,6 +57,7 @@ public class WebApp {
         app.post("/depositar/{trasladoId}", new DepositarCotroller(fachada));
         app.post("/retirar/{trasladoId}", new RetirarController(fachada));
         app.get("/traslados/search/{colaboradorId}", new ListaTrasladosXColaborador(fachada));
+        app.get("/clear",new DBController(fachada));
     }
 
     public static ObjectMapper createObjectMapper() {

@@ -184,6 +184,24 @@ public RutaDTO agregar(RutaDTO rutaDTO){
         repositorioTraslado.getEntityManager().close();
     }
 
+    public void clear(){
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        repositorioRuta.setEntityManager(entityManager);
+        repositorioTraslado.setEntityManager(entityManager);
+        entityManager.getTransaction().begin();
+        try{
+            entityManager.createQuery("DELETE FROM Traslado").executeUpdate();
+            entityManager.createQuery("DELETE FROM Ruta ").executeUpdate();
+            entityManager.getTransaction().commit();
+        } catch (RuntimeException e){
+            if(entityManager.getTransaction().isActive())
+                entityManager.getTransaction().rollback();
+            throw e;
+        }finally {
+            entityManager.close();
+        }
+    }
+
 
 @Override
 public void setHeladerasProxy(FachadaHeladeras fachadaHeladeras){this.fachadaHeladeras = fachadaHeladeras;}
